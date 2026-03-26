@@ -6,4 +6,6 @@ import java.util.List;
 
 public interface FileRepository extends JpaRepository<FileEntity, Long> {
     List<FileEntity> findByOwnerId(String ownerId);
+    List<FileEntity> findByIdInAndOwnerId(List<Long> ids, String ownerId);
+    void deleteByIdInAndOwnerId(List<Long> ids, String ownerId);
 }

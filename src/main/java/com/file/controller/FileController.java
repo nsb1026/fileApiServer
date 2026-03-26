@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/files")
@@ -44,6 +45,17 @@ public class FileController {
         FileEntity file = fileService.get(id, userId);
 
         return ResponseEntity.ok(file);
+    }
+
+    // 일괄 상세 조회 (예: /api/files/batch?ids=1,2,3)
+    @GetMapping("/batch")
+    public ResponseEntity<?> getBatch(
+            @RequestParam List<Long> ids,
+            Authentication authentication) {
+
+        String userId = (String) authentication.getPrincipal();
+
+        return ResponseEntity.ok(fileService.getListByIds(ids, userId));
     }
 
     // 목록 조회
@@ -82,6 +94,19 @@ public class FileController {
         String userId = (String) authentication.getPrincipal();
 
         fileService.delete(id, userId);
+
+        return ResponseEntity.ok().build();
+    }
+
+    // 일괄 삭제 (예: DELETE /api/files/batch?ids=1,2,3)
+    @DeleteMapping("/batch")
+    public ResponseEntity<?> deleteBatch(
+            @RequestParam List<Long> ids,
+            Authentication authentication) throws IOException {
+
+        String userId = (String) authentication.getPrincipal();
+
+        fileService.deleteMultiple(ids, userId);
 
         return ResponseEntity.ok().build();
     }

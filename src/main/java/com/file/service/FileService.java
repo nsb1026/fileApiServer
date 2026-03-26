@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -53,6 +54,11 @@ public class FileService {
         return file;
     }
 
+    // 일괄 상세 조회
+    public List<FileEntity> getListByIds(List<Long> ids, String userId) {
+        return fileRepository.findByIdInAndOwnerId(ids, userId);
+    }
+
     public List<FileEntity> list(String userId) {
         return fileRepository.findByOwnerId(userId);
     }
@@ -69,6 +75,16 @@ public class FileService {
 
         Files.deleteIfExists(Paths.get(file.getPath()));
         fileRepository.delete(file);
+    }
+
+    // 일괄 삭제
+    @Transactional
+    public void deleteMultiple(List<Long> ids, String userId) throws IOException {
+        List<FileEntity> files = fileRepository.findByIdInAndOwnerId(ids, userId);
+        for (FileEntity file : files) {
+            Files.deleteIfExists(Paths.get(file.getPath()));
+        }
+        fileRepository.deleteByIdInAndOwnerId(ids, userId);
     }
 
     private void validateOwner(FileEntity file, String userId) {
