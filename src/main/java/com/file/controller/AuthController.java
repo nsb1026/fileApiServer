@@ -22,6 +22,10 @@ public class AuthController {
     /**
      * 타 시스템에서 로그인 후 호출하는 토큰 생성 API
      * X-API-KEY 헤더를 통해 사전에 약속된 키를 전달해야 토큰이 발급됩니다.
+     * curl -X POST http://localhost:8080/api/auth/token \
+     *      -H "Content-Type: application/json" \
+     *      -H "X-API-KEY: my-secure-internal-api-key-12345" \
+     *      -d '{"userId": "user123"}'
      */
     @PostMapping("/token")
     public ResponseEntity<?> generateToken(
