@@ -2,6 +2,8 @@ package com.file.controller;
 
 import com.file.security.TokenProvider;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,12 +16,23 @@ public class AuthController {
 
     private final TokenProvider tokenProvider;
 
+    @Value("${internal.api.key}")
+    private String internalApiKey;
+
     /**
      * 타 시스템에서 로그인 후 호출하는 토큰 생성 API
-     * 보안을 위해 실제 환경에서는 추가적인 API Key나 내부망 제어가 필요합니다.
+     * X-API-KEY 헤더를 통해 사전에 약속된 키를 전달해야 토큰이 발급됩니다.
      */
     @PostMapping("/token")
-    public ResponseEntity<?> generateToken(@RequestBody Map<String, String> request) {
+    public ResponseEntity<?> generateToken(
+            @RequestHeader(value = "X-API-KEY", required = false) String apiKey,
+            @RequestBody Map<String, String> request) {
+
+        // API Key 검증
+        if (apiKey == null || !apiKey.equals(internalApiKey)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid or missing X-API-KEY");
+        }
+
         String userId = request.get("userId");
         if (userId == null || userId.isEmpty()) {
             return ResponseEntity.badRequest().body("userId is required");
